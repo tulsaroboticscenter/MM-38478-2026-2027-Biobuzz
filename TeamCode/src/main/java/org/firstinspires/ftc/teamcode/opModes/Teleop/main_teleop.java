@@ -31,12 +31,15 @@ public class main_teleop extends LinearOpMode {
     static final double BARREL_TICKS_PER_REV = 28.0;
 
     // Your old power range 0.5–0.8 is roughly 3000–4800 RPM on a 6000 RPM motor.
-    static final double BARREL_RPM_INIT      = 4000;
+    static final double BARREL_RPM_INIT      = 2900;
     static final double BARREL_RPM_INCREMENT = 250;
-    static final double BARREL_RPM_MIN       = 3000;
-    static final double BARREL_RPM_MAX       = 5000;
+    static final double BARREL_RPM_MIN       = 2000;
+    static final double BARREL_RPM_MAX       = 3500;
     static final double BARREL_RPM_TOLERANCE = 100;   // for the "AT SPEED" indicator
     // --------------------------------------------------------------
+
+    String intakeFlag = "Off";
+    double intakePower = 0;
 
     @Override
     public void runOpMode() {
@@ -139,30 +142,30 @@ public class main_teleop extends LinearOpMode {
             // Dpad up:   Intake 2 off
             // Dpad left: Intake 2 reverse
 
-            boolean triangle_state = gamepad2.triangle;
-            boolean circle_state   = gamepad2.circle;
-
-            double now = System.currentTimeMillis();
-
-            if ((triangle_state && !triangle_last) &&
-                    ( now - last_triangle_time) > debounceDelay ) {
-                barrelRPM += BARREL_RPM_INCREMENT;
-                last_triangle_time = now;
-            }
-            if ((circle_state && !circle_last) &&
-                    ( now - last_circle_time) > debounceDelay ) {
-                barrelRPM -= BARREL_RPM_INCREMENT;
-                last_circle_time = now;
-            }
+//            boolean triangle_state = gamepad2.triangle;
+//            boolean circle_state   = gamepad2.circle;
+//
+//            double now = System.currentTimeMillis();
+//
+//            if ((triangle_state && !triangle_last) &&
+//                    ( now - last_triangle_time) > debounceDelay ) {
+//                barrelRPM += BARREL_RPM_INCREMENT;
+//                last_triangle_time = now;
+//            }
+//            if ((circle_state && !circle_last) &&
+//                    ( now - last_circle_time) > debounceDelay ) {
+//                barrelRPM -= BARREL_RPM_INCREMENT;
+//                last_circle_time = now;
+//            }
 
             barrelRPM = Math.max(BARREL_RPM_MIN, Math.min(BARREL_RPM_MAX, barrelRPM));
 
-            triangle_last = triangle_state;
-            circle_last   = circle_state;
+//            triangle_last = triangle_state;
+//            circle_last   = circle_state;
 
-            if (gamepad2.square) {
+            if (gamepad2.square || gamepad1.square) {
                 barrelOn = true;
-            } else if (gamepad2.cross) {
+            } else if (gamepad2.cross || gamepad1.cross) {
                 barrelOn = false;
             }
 
@@ -173,29 +176,33 @@ public class main_teleop extends LinearOpMode {
                 setBarrelRPM(0);
             }
 
-            if (gamepad2.left_bumper) {
-                intake.setPower(1);
+
+            if (gamepad1.right_trigger_pressed) {
+                intakeFlag = "Reverse";
+            } else if (gamepad1.left_bumper) {
+                intakeFlag = "Forward";
+            }else if (gamepad1.right_bumper) {
+                intakeFlag = "Off";
+            }else if(!gamepad1.right_trigger_pressed && intakeFlag != "Forward"){
+                intakeFlag = "Off";
             }
 
-            if (gamepad2.right_bumper) {
+            if (intakeFlag == "Reverse") {
+                intake.setPower(-1);
+            } else if (intakeFlag == "Forward") {
+                intake.setPower(1);
+            }else if (intakeFlag == "Off") {
                 intake.setPower(0);
             }
 
-            if (gamepad2.right_trigger_pressed) {
-                intake.setPower(-1);
-            }
 
-            if (gamepad2.dpad_down) {
+            if (gamepad1.dpad_down) {
                 intaketwo.setPower(1);
                 intake.setPower(1);
-            }
-
-            if (gamepad2.dpad_up) {
-                intaketwo.setPower(0);
-            }
-
-            if (gamepad2.dpad_left) {
+            }else if (gamepad1.dpad_left) {
                 intaketwo.setPower(-1);
+            } else {
+                intaketwo.setPower(0);
             }
 
             // Shooter telemetry
