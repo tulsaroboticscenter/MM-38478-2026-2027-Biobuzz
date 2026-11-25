@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.classes;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.opModes.Auto.AutoDriveByEncoder;
+//import org.firstinspires.ftc.teamcode.opModes.Auto.AutoDriveByEncoder;
 
 public class Globals {
     public static Pose2D lastKnownPosition = null;
